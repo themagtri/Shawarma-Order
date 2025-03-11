@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הזמנת שווארמה</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; direction: rtl; background-color: #e0f7fa; }
+        .options { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+        button { 
+            margin: 5px; 
+            padding: 15px; 
+            font-size: 18px; 
+            border: none; 
+            cursor: pointer; 
+            width: 150px; 
+            border-radius: 50px; 
+            background-color: #ffffff; 
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .selected { background-color: #4caf50; color: white; transform: scale(1.1); }
+        .excluded { background-color: #f44336; color: white; transform: scale(0.9); }
+        h1 { color: #00796b; }
+        img { width: 100%; max-width: 400px; border-radius: 20px; margin-top: 20px; }
+        .description { margin: 20px; font-size: 18px; color: #004d40; }
+    </style>
+</head>
+<body>
+    <h1>🥙 הזמנת שווארמה 🥙</h1>
+    <p class="description">📌 בחר את מה שיש בשווארמה שמולך, ואני אבצע את התעדוף על פי ההיכרות שלי עם הלקוח (שזה אני כמובן!) 😋</p>
+    <img src="https://cdn.pixabay.com/photo/2020/01/29/20/28/shawarma-4804904_1280.jpg" alt="שווארמה טעימה">
+    <div id="question"></div>
+    <div class="options" id="options"></div>
+    <button id="prev" style="display:none;" onclick="prevQuestion()">🔙 חזור</button>
+    <button id="next" style="display:none;" onclick="nextQuestion()">➡️ המשך</button>
+    <h2 id="summary" style="display:none;"></h2>
+
+    <script>
+        let step = 0;
+        let choices = {};
+        const questions = [
+            { 
+                text: "🍞 איזה לחם יש בשווארמה?", 
+                options: ["לאפה", "פיתה", "בגאט"],
+                priority: ["לאפה", "פיתה", "בגאט"]
+            },
+            { 
+                text: "🥩 איזה בשר יש?", 
+                options: ["עגל", "כבש", "הודו", "פרגית"],
+                priority: ["עגל", "כבש", "הודו", "פרגית"]
+            }
+        ];
+
+        function loadQuestion() {
+            if (step < questions.length) {
+                document.getElementById("question").innerText = questions[step].text;
+                document.getElementById("options").innerHTML = "";
+                questions[step].options.forEach(option => {
+                    let btn = document.createElement("button");
+                    btn.innerText = option;
+                    btn.dataset.state = "none";
+                    btn.onclick = () => toggleSelection(btn, option);
+                    document.getElementById("options").appendChild(btn);
+                });
+                document.getElementById("next").style.display = "block";
+                document.getElementById("prev").style.display = step > 0 ? "block" : "none";
+            } else {
+                showSummary();
+            }
+        }
+
+        function toggleSelection(button, option) {
+            if (button.dataset.state === "none") {
+                button.dataset.state = "selected";
+                button.classList.add("selected");
+                choices[option] = true;
+            } else if (button.dataset.state === "selected") {
+                button.dataset.state = "excluded";
+                button.classList.remove("selected");
+                button.classList.add("excluded");
+                choices[option] = false;
+            } else {
+                button.dataset.state = "none";
+                button.classList.remove("excluded");
+                delete choices[option];
+            }
+        }
+
+        function nextQuestion() {
+            step++;
+            loadQuestion();
+        }
+        
+        function prevQuestion() {
+            if (step > 0) {
+                step--;
+                loadQuestion();
+            }
+        }
+
+        function showSummary() {
+            document.getElementById("question").style.display = "none";
+            document.getElementById("options").style.display = "none";
+            document.getElementById("next").style.display = "none";
+            document.getElementById("prev").style.display = "none";
+            let selectedBread = questions[0].priority.find(choice => choices[choice]) || "לחם לא נבחר";
+            let selectedMeat = questions[1].priority.find(choice => choices[choice]) || "בשר לא נבחר";
+            document.getElementById("summary").innerText = `✅ סיכום הזמנה:
+${selectedBread} עם ${selectedMeat} 🥙
+קצת עגבנייה וקצת כרוב לבן או אדום זהו בלי חומוס בלי טחינה
+🥤 לשתות סודה בבקשה
+
+תודה רבה! 😊`;
+            document.getElementById("summary").style.display = "block";
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
